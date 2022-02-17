@@ -6,6 +6,7 @@
 1. [初めてのREST API【Re:ゼロから始めるWeb API入門実践編#1】](https://www.youtube.com/watch?v=9GGRICOjA4c)
 2. [環境構築とHello World【Re:ゼロから始めるWeb API入門実践編#2】](https://www.youtube.com/watch?v=DrxcoMMgZKg)
 3. [リソース設計とDB設計【Re:ゼロから始めるWeb API入門実践編#3】](https://www.youtube.com/watch?v=x4ZrmnqoS1Y)
+4. [GET用APIのハンズオン開発【Re:ゼロから始めるWeb API入門実践編#4】](https://www.youtube.com/watch?v=dURpu7Bjr_Y)
 
 ## データ特定 ＆ リソース設計
 * ユーザー情報：ユーザーID、ユーザー名、プロフィール、写真 etc...
@@ -52,6 +53,21 @@
   * リンクとフォームでリソースを結びつける
   * イベントの標準的なコースを設計する -> 正常動作時
   * エラーを想定する -> 例外発生時
+
+* Node.jsのsqlite基本メソッド
+  * データベース接続の開始
+    * `const dbPath = 'app/db/database.sqlite3';`
+    * `const db = new sqlite3.Database(dbPath);`
+  * 内部のSQLクエリを同期的に実行
+    * `db.serialize(() => { // queries });`
+  * 全ての結果を1度に取得
+    * `db.all(sql, (err, rows));`
+  * 1つだけ結果を取得
+    * `db.get(sql, (err, row));`
+  * SQLクエリを実行
+    * `db.run(sql, (err));`
+  * データベース接続を終了
+    * `db.close();`
 
 ## コマンド
 ### Node.jsのホットリロード用に`node-dev`をグローバルインストール
