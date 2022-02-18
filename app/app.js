@@ -1,8 +1,12 @@
 // express
 const express = require('express');
 const app = express();
+// sqlite3の設定
 const sqlite3 = require('sqlite3');
 const dbPath = 'app/db/database.sqlite3';
+// 静的ファイルのドキュメントルート設定
+const path = require('path');
+app.use(express.static(path.join(__dirname, 'public')));
 
 // GETメソッド(Hello World!を返す)
 app.get('/api/v1/hello', (req, res) => {

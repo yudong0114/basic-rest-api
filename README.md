@@ -7,6 +7,7 @@
 2. [環境構築とHello World【Re:ゼロから始めるWeb API入門実践編#2】](https://www.youtube.com/watch?v=DrxcoMMgZKg)
 3. [リソース設計とDB設計【Re:ゼロから始めるWeb API入門実践編#3】](https://www.youtube.com/watch?v=x4ZrmnqoS1Y)
 4. [GET用APIのハンズオン開発【Re:ゼロから始めるWeb API入門実践編#4】](https://www.youtube.com/watch?v=dURpu7Bjr_Y)
+5. [HTMLのフォームからAPIを実行しよう【Re:ゼロから始めるWeb API入門実践編#5】](https://www.youtube.com/watch?v=pRoIxvhFbow)
 
 ## データ特定 ＆ リソース設計
 * ユーザー情報：ユーザーID、ユーザー名、プロフィール、写真 etc...
