@@ -1,12 +1,19 @@
-// express
+// expressの設定
 const express = require('express');
 const app = express();
+
 // sqlite3の設定
 const sqlite3 = require('sqlite3');
 const dbPath = 'app/db/database.sqlite3';
+
 // 静的ファイルのドキュメントルート設定
 const path = require('path');
 app.use(express.static(path.join(__dirname, 'public')));
+
+// リクエストのbodyを読み取る設定
+const bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.json());
 
 // GETメソッド(Hello World!を返す)
 app.get('/api/v1/hello', (req, res) => {
@@ -50,6 +57,41 @@ app.get('/api/v1/search', (req, res) => {
     res.json(rows);
   });
   // DB接続の終了
+  db.close();
+});
+
+// POSTメソッド(ユーザーの作成)
+app.post('/api/v1/users', async (req, res) => {
+  // DBに接続
+  const db = new sqlite3.Database(dbPath);
+  // リクエスト内容を変数に格納
+  // ※idはAutoIncrementで設定、profileとdate_of_birthは任意
+  const name = req.body.name;
+  const profile = req.body.profile || '';
+  const dateOfBirth = req.body.date_of_birth || '';
+  // SQL実行関数の作成
+  const run = async(sql) => {
+    // Promiseオブジェクトの作成
+    return new Promise((resolve, reject) => {
+      // エラー時の処理
+      // db.runはsqlite3のメソッド
+      db.run(sql, (err) => {
+        if (err) {
+          res.status(500).send(err);
+          return reject();
+        } else {
+          res.json({message: '新規ユーザーを作成しました！'});
+          return resolve();
+        }
+        
+      })
+    })
+  }
+
+  // resolve or rejectが返るまで処理を待つ
+  await run(`INSERT INTO users (name, profile, date_of_birth) VALUES ("${name}", "${profile}", "${dateOfBirth}")`)
+
+  // DB接続の終了(runが終わるまでここは実行されない)
   db.close();
 });
 
