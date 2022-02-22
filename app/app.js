@@ -69,31 +69,90 @@ app.post('/api/v1/users', async (req, res) => {
   const name = req.body.name;
   const profile = req.body.profile || '';
   const dateOfBirth = req.body.date_of_birth || '';
-  // SQL実行関数の作成
-  const run = async(sql) => {
-    // Promiseオブジェクトの作成
-    return new Promise((resolve, reject) => {
-      // エラー時の処理
-      // db.runはsqlite3のメソッド
-      db.run(sql, (err) => {
-        if (err) {
-          res.status(500).send(err);
-          return reject();
-        } else {
-          res.json({message: '新規ユーザーを作成しました！'});
-          return resolve();
-        }
-        
-      })
-    })
-  }
 
   // resolve or rejectが返るまで処理を待つ
-  await run(`INSERT INTO users (name, profile, date_of_birth) VALUES ("${name}", "${profile}", "${dateOfBirth}")`)
+  await run(
+    `INSERT INTO users (name, profile, date_of_birth) VALUES ("${name}", "${profile}", "${dateOfBirth}")`, 
+    db, 
+    res, 
+    '新規ユーザーを作成しました！'
+  );
 
   // DB接続の終了(runが終わるまでここは実行されない)
   db.close();
 });
+
+// PUTメソッド(ユーザーの更新)
+app.put('/api/v1/users/:id', async (req, res) => {
+  // DBに接続
+  const db = new sqlite3.Database(dbPath);
+  // リクエスト内容を変数に格納
+  const id = req.params.id;
+
+  // 現在のユーザー情報を取得
+  db.get(`SELECT * FROM users WHERE id = ${id}`, async (err, row) => {
+    const name = req.body.name || row.name;
+    const profile = req.body.profile || row.profile;
+    const dateOfBirth = req.body.date_of_birth || row.date_of_birth;
+
+    // resolve or rejectが返るまで処理を待つ
+    await run(
+      `UPDATE users SET name="${name}", profile="${profile}", date_of_birth="${dateOfBirth}" WHERE id=${id}`, 
+      db, 
+      res, 
+      'ユーザー情報を更新しました！'
+    );
+  });
+
+  // DB接続の終了(runが終わるまでここは実行されない)
+  db.close();
+});
+
+// DELETEメソッド(ユーザーの削除)
+app.delete('/api/v1/users/:id', async (req, res) => {
+  // DBに接続
+  const db = new sqlite3.Database(dbPath);
+  // リクエスト内容を変数に格納
+  const id = req.params.id;
+
+  // resolve or rejectが返るまで処理を待つ
+  await run(
+    `DELETE FROM users WHERE id="${id}"`, 
+    db, 
+    res, 
+    'ユーザー情報を削除しました！'
+  );
+
+  // DB接続の終了(runが終わるまでここは実行されない)
+  db.close();
+});
+
+/**
+ * SQL実行関数
+ * 
+ * @param sql {string} 実行するSQL文
+ * @param db  {sqlite3.Database} DBの接続情報
+ * @param res  {Response} リクエストに対するレスポンス構成のオブジェクト
+ * @param message  {string} 実行完了のメッセージ
+ * @returns {Promise} SQLの実行のPromise
+ */
+const run = async(sql, db, res, message) => {
+  // Promiseオブジェクトの作成
+  return new Promise((resolve, reject) => {
+    // エラー時の処理
+    // db.runはsqlite3のメソッド
+    db.run(sql, (err) => {
+      if (err) {
+        res.status(500).send(err);
+        return reject();
+      } else {
+        res.json({message: message});
+        return resolve();
+      }
+      
+    })
+  })
+}
 
 // ポート設定
 const port = process.env.PORT || 3000;
