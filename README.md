@@ -9,6 +9,7 @@
 4. [GET用APIのハンズオン開発【Re:ゼロから始めるWeb API入門実践編#4】](https://www.youtube.com/watch?v=dURpu7Bjr_Y)
 5. [HTMLのフォームからAPIを実行しよう【Re:ゼロから始めるWeb API入門実践編#5】](https://www.youtube.com/watch?v=pRoIxvhFbow)
 6. [CRUDなAPIを開発しよう【Re:ゼロから始めるWeb API入門実践編#6】](https://www.youtube.com/watch?v=GffwSIY_7xE)
+7. [ユーザー作成フォームとAPIを繋げよう#7】](https://www.youtube.com/watch?v=ye5hs_ZBhcM)
 
 
 
