@@ -27,6 +27,31 @@ const indexModule = (() => {
         });
       break;
 
+    case '/edit.html':
+      // uidの受け取り
+      const uid = window.location.search.split('?uid=')[1];
+
+      // ユーザーの編集
+      document.getElementById('save-btn')
+        .addEventListener('click', () => {
+          return usersModule.saveUser(uid);
+        });
+
+      // キャンセルボタン
+      document.getElementById('cancel-btn')
+        .addEventListener('click', () => {
+          return window.location.href = '/';
+        });
+
+      // ユーザーの削除
+      document.getElementById('delete-btn')
+        .addEventListener('click', () => {
+          return usersModule.deleteUser(uid);
+        });
+
+      return usersModule.setExistingValue(uid);
+      break;
+
     default:
       break;
   }

@@ -23,6 +23,7 @@ const usersModule = (() => {
                         <td>${user.date_of_birth}</td>
                         <td>${user.created_at}</td>
                         <td>${user.updated_at}</td>
+                        <td><a href="edit.html?uid=${user.id}">編集</a></td>
                       </tr>`;
         // テーブルに追加
         document.getElementById('users-list').insertAdjacentHTML('beforeend', body);
@@ -45,6 +46,64 @@ const usersModule = (() => {
         method: 'POST',
         headers: headers,
         body: JSON.stringify(body),
+      });
+
+      // レスポンスの受け取り
+      const resJson = await res.json();
+
+      // レスポンスのメッセージをアラートで表示
+      alert(resJson.message);
+      window.location.href = '/';
+    },
+    setExistingValue: async (uid) => {
+      // ID指定でユーザーを取得
+      const res = await fetch(BASE_URL + '/' + uid);
+
+      // レスポンスの受け取り
+      const resJson = await res.json();
+
+      // inputにセット
+      document.getElementById('name').value = resJson.name;
+      document.getElementById('profile').value = resJson.profile;
+      document.getElementById('date-of-birth').value = resJson.date_of_birth;
+    },
+    saveUser: async (uid) => {
+      const name = document.getElementById('name').value;
+      const profile = document.getElementById('profile').value;
+      const dateOfBirth = document.getElementById('date-of-birth').value;
+
+      // リクエストのbody
+      const body = {
+        name: name,
+        profile: profile,
+        date_of_birth: dateOfBirth,
+      }
+
+      // APIを叩く
+      const res = await fetch(BASE_URL + '/' + uid, {
+        method: 'PUT',
+        headers: headers,
+        body: JSON.stringify(body),
+      });
+
+      // レスポンスの受け取り
+      const resJson = await res.json();
+
+      // レスポンスのメッセージをアラートで表示
+      alert(resJson.message);
+      window.location.href = '/';
+    },
+    deleteUser: async (uid) => {
+      // 削除確認ダイアログ
+      const ret = window.confirm('このユーザーを削除しますか？');
+      if(!ret) {
+        return false;
+      }
+
+      // APIを叩く
+      const res = await fetch(BASE_URL + '/' + uid, {
+        method: 'DELETE',
+        headers: headers,
       });
 
       // レスポンスの受け取り
