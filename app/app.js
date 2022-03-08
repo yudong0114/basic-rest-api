@@ -40,7 +40,12 @@ app.get('/api/v1/users/:id', (req, res) => {
   const id = req.params.id;
   // id指定のusersの取得
   db.get(`SELECT * FROM users WHERE id = ${id}`, (err, row) => {
-    res.json(row);
+    // ユーザー名が取得できない場合、404エラー
+    if(!row) {
+      res.status(404).send({error: 'Not Found!'});
+    } else {
+      res.status(200).json(row);
+    }
   });
   // DB接続の終了
   db.close();
@@ -62,50 +67,71 @@ app.get('/api/v1/search', (req, res) => {
 
 // POSTメソッド(ユーザーの作成)
 app.post('/api/v1/users', async (req, res) => {
-  // DBに接続
-  const db = new sqlite3.Database(dbPath);
-  // リクエスト内容を変数に格納
-  // ※idはAutoIncrementで設定、profileとdate_of_birthは任意
-  const name = req.body.name;
-  const profile = req.body.profile || '';
-  const dateOfBirth = req.body.date_of_birth || '';
+  // 必須のnameがない場合、400エラー
+  if(!req.body.name || req.body.name === '') {
+    res.status(400).send({error: 'ユーザー名が指定されていません。'});
+  } else {
+    // DBに接続
+    const db = new sqlite3.Database(dbPath);
+    // リクエスト内容を変数に格納
+    // ※idはAutoIncrementで設定、profileとdate_of_birthは任意
+    const name = req.body.name;
+    const profile = req.body.profile || '';
+    const dateOfBirth = req.body.date_of_birth || '';
 
-  // resolve or rejectが返るまで処理を待つ
-  await run(
-    `INSERT INTO users (name, profile, date_of_birth) VALUES ("${name}", "${profile}", "${dateOfBirth}")`, 
-    db, 
-    res, 
-    '新規ユーザーを作成しました！'
-  );
-
-  // DB接続の終了(runが終わるまでここは実行されない)
-  db.close();
+    try {
+      // resolve or rejectが返るまで処理を待つ
+      await run(
+        `INSERT INTO users (name, profile, date_of_birth) VALUES ("${name}", "${profile}", "${dateOfBirth}")`, 
+        db, 
+      );
+      res.status(201).send({message: '新規ユーザーを作成しました！'});
+    } catch(e) {
+      // rejectでerrを返す、eで受け取る
+      res.status(500).send({error: e});
+    }
+    // DB接続の終了(runが終わるまでここは実行されない)
+    db.close();
+  }
 });
 
 // PUTメソッド(ユーザーの更新)
 app.put('/api/v1/users/:id', async (req, res) => {
-  // DBに接続
-  const db = new sqlite3.Database(dbPath);
-  // リクエスト内容を変数に格納
-  const id = req.params.id;
+  // 必須のnameがない場合、400エラー
+  if(!req.body.name || req.body.name === '') {
+    res.status(400).send({error: 'ユーザー名が指定されていません。'});
+  } else {
+    // DBに接続
+    const db = new sqlite3.Database(dbPath);
+    // リクエスト内容を変数に格納
+    const id = req.params.id;
 
-  // 現在のユーザー情報を取得
-  db.get(`SELECT * FROM users WHERE id = ${id}`, async (err, row) => {
-    const name = req.body.name || row.name;
-    const profile = req.body.profile || row.profile;
-    const dateOfBirth = req.body.date_of_birth || row.date_of_birth;
+    // 現在のユーザー情報を取得
+    db.get(`SELECT * FROM users WHERE id = ${id}`, async (err, row) => {
+      // ユーザー名が取得できない場合、404エラー
+      if(!row) {
+        res.status(404).send({error: '指定されたユーザーが存在しません！'});
+      } else {      
+        const name = req.body.name || row.name;
+        const profile = req.body.profile || row.profile;
+        const dateOfBirth = req.body.date_of_birth || row.date_of_birth;
 
-    // resolve or rejectが返るまで処理を待つ
-    await run(
-      `UPDATE users SET name="${name}", profile="${profile}", date_of_birth="${dateOfBirth}" WHERE id=${id}`, 
-      db, 
-      res, 
-      'ユーザー情報を更新しました！'
-    );
-  });
-
-  // DB接続の終了(runが終わるまでここは実行されない)
-  db.close();
+        try {
+          // resolve or rejectが返るまで処理を待つ
+          await run(
+            `UPDATE users SET name="${name}", profile="${profile}", date_of_birth="${dateOfBirth}" WHERE id=${id}`, 
+            db, 
+          );
+          res.status(200).send({message: 'ユーザー情報を更新しました！'});
+        } catch(e) {
+          // rejectでerrを返す、eで受け取る
+          res.status(500).send({error: e});
+        }
+      }
+    });
+    // DB接続の終了(runが終わるまでここは実行されない)
+    db.close();
+  }
 });
 
 // DELETEメソッド(ユーザーの削除)
@@ -115,13 +141,25 @@ app.delete('/api/v1/users/:id', async (req, res) => {
   // リクエスト内容を変数に格納
   const id = req.params.id;
 
-  // resolve or rejectが返るまで処理を待つ
-  await run(
-    `DELETE FROM users WHERE id="${id}"`, 
-    db, 
-    res, 
-    'ユーザー情報を削除しました！'
-  );
+  // 現在のユーザー情報を取得
+  db.get(`SELECT * FROM users WHERE id = ${id}`, async (err, row) => {
+    // ユーザー名が取得できない場合、404エラー
+    if(!row) {
+      res.status(404).send({error: '指定されたユーザーが存在しません！'});
+    } else {      
+      try {
+        // resolve or rejectが返るまで処理を待つ
+        await run(
+          `DELETE FROM users WHERE id="${id}"`, 
+          db, 
+        );
+        res.status(200).send({message: 'ユーザーを削除しました！'});
+      } catch(e) {
+        // rejectでerrを返す、eで受け取る
+        res.status(500).send({error: e});
+      }
+    }
+  });
 
   // DB接続の終了(runが終わるまでここは実行されない)
   db.close();
@@ -136,20 +174,17 @@ app.delete('/api/v1/users/:id', async (req, res) => {
  * @param message  {string} 実行完了のメッセージ
  * @returns {Promise} SQLの実行のPromise
  */
-const run = async(sql, db, res, message) => {
+const run = async(sql, db) => {
   // Promiseオブジェクトの作成
   return new Promise((resolve, reject) => {
     // エラー時の処理
     // db.runはsqlite3のメソッド
     db.run(sql, (err) => {
       if (err) {
-        res.status(500).send(err);
-        return reject();
+        return reject(err);
       } else {
-        res.json({message: message});
         return resolve();
       }
-      
     })
   })
 }
