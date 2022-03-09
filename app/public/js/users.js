@@ -8,6 +8,42 @@ const usersModule = (() => {
   const headers = new Headers();
   headers.set('Content-Type', 'application/json');
 
+  // 例外処理
+  const handleError = async (res) => {
+    // レスポンスの受け取り
+    const resJson = await res.json();
+
+    switch (res.status) {
+      case 200:
+        // 成功
+        alert(resJson.message);
+        window.location.href = '/';
+        break;
+      case 201:
+        // 成功(作成)
+        alert(resJson.message);
+        window.location.href = '/';
+        break;
+      case 400:
+        // リクエストパラメータ間違い
+        alert(resJson.error);
+        break;
+      case 404:
+        // 指定リソースが存在しない
+        alert(resJson.error);
+        break;
+      case 500:
+        // サーバーの内部エラー
+        alert(resJson.error);
+        break;
+      default:
+        alert('何らかのエラーが発生しました。');
+        break;
+    }
+
+    
+  }
+
   return {
     fetchAllUsers: async () => {
       // APIを叩く
@@ -48,12 +84,7 @@ const usersModule = (() => {
         body: JSON.stringify(body),
       });
 
-      // レスポンスの受け取り
-      const resJson = await res.json();
-
-      // レスポンスのメッセージをアラートで表示
-      alert(resJson.message);
-      window.location.href = '/';
+      handleError(res);
     },
     setExistingValue: async (uid) => {
       // ID指定でユーザーを取得
@@ -86,12 +117,7 @@ const usersModule = (() => {
         body: JSON.stringify(body),
       });
 
-      // レスポンスの受け取り
-      const resJson = await res.json();
-
-      // レスポンスのメッセージをアラートで表示
-      alert(resJson.message);
-      window.location.href = '/';
+      handleError(res);
     },
     deleteUser: async (uid) => {
       // 削除確認ダイアログ
@@ -106,12 +132,7 @@ const usersModule = (() => {
         headers: headers,
       });
 
-      // レスポンスの受け取り
-      const resJson = await res.json();
-
-      // レスポンスのメッセージをアラートで表示
-      alert(resJson.message);
-      window.location.href = '/';
+      handleError(res);
     }
   }
 })();
