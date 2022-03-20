@@ -73,6 +73,30 @@ app.get("/api/v1/users/:id/following", (req, res) => {
   db.close();
 });
 
+// GETメソッド(単一のユーザーのフォローしている単一ユーザーを取得)
+app.get("/api/v1/users/:id/following/:followed_id", (req, res) => {
+  // DBに接続
+  const db = new sqlite3.Database(dbPath);
+  // idを変数に格納
+  const id = req.params.id;
+  // followed_idを変数に格納
+  const followed_id = req.params.followed_id;
+  // 全てを取得
+  db.get(
+    `SELECT * FROM following LEFT JOIN users ON following.followed_id = users.id WHERE following_id = ${id} AND followed_id = ${followed_id};`,
+    (err, row) => {
+      // ユーザー名が取得できない場合、404エラー
+      if (!row) {
+        res.status(404).send({ error: "Not Found!" });
+      } else {
+        res.status(200).json(row);
+      }
+    }
+  );
+  // DB接続の終了
+  db.close();
+});
+
 // GETメソッド(検索にマッチした全てのユーザーを取得)
 app.get("/api/v1/search", (req, res) => {
   // DBに接続
