@@ -97,6 +97,52 @@ app.get("/api/v1/users/:id/following/:followed_id", (req, res) => {
   db.close();
 });
 
+// GETメソッド(単一のユーザーのフォロワーを取得)
+app.get("/api/v1/users/:id/followers", (req, res) => {
+  // DBに接続
+  const db = new sqlite3.Database(dbPath);
+  // idを変数に格納
+  const id = req.params.id;
+  // 全てを取得(getだとマッチした一つ)
+  db.all(
+    `SELECT * FROM following LEFT JOIN users ON following.followed_id = users.id WHERE followed_id = ${id};`,
+    (err, rows) => {
+      // ユーザー名が取得できない場合、404エラー
+      if (!rows) {
+        res.status(404).send({ error: "Not Found!" });
+      } else {
+        res.status(200).json(rows);
+      }
+    }
+  );
+  // DB接続の終了
+  db.close();
+});
+
+// GETメソッド(単一のユーザーのフォロワー単一を取得)
+app.get("/api/v1/users/:id/followers/:following_id", (req, res) => {
+  // DBに接続
+  const db = new sqlite3.Database(dbPath);
+  // idを変数に格納
+  const id = req.params.id;
+  // following_idを変数に格納
+  const following_id = req.params.following_id;
+  // 全てを取得
+  db.get(
+    `SELECT * FROM following LEFT JOIN users ON following.followed_id = users.id WHERE followed_id = ${id} AND following_id = ${following_id};`,
+    (err, row) => {
+      // ユーザー名が取得できない場合、404エラー
+      if (!row) {
+        res.status(404).send({ error: "Not Found!" });
+      } else {
+        res.status(200).json(row);
+      }
+    }
+  );
+  // DB接続の終了
+  db.close();
+});
+
 // GETメソッド(検索にマッチした全てのユーザーを取得)
 app.get("/api/v1/search", (req, res) => {
   // DBに接続
